@@ -1,0 +1,84 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.tab-active-login {
+  background: linear-gradient(135deg, #f8d7e8, #f0afd0);
+  color: #9d4070 !important;
+}
+.tab-active-reset {
+  background: linear-gradient(135deg, #e8d5f5, #c9a8eb);
+  color: #6b34a8 !important;
+}
+.tab-active-register {
+  background: linear-gradient(135deg, #d5f0e8, #8ed9bf);
+  color: #2a7a5c !important;
+}
+.tab-active-token {
+  background: linear-gradient(135deg, #d5e8f8, #8fc8f0);
+  color: #1a5a90 !important;
+}
+
+.card-bg {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.65rem 0.9rem 0.65rem 2.6rem;
+  border: 1.5px solid #e8d5f5;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.8);
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+
+  &:focus {
+    border-color: #c9a8eb;
+    box-shadow: 0 0 0 3px rgba(201, 168, 235, 0.2);
+  }
+}
+
+%btn-base {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 14px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-primary-login {
+  @extend %btn-base;
+  background: linear-gradient(135deg, #f0afd0, #e87bb8);
+  letter-spacing: 0.02em;
+}
+
+.btn-primary-reset {
+  @extend %btn-base;
+  background: linear-gradient(135deg, #c9a8eb, #a870d8);
+}
+
+.btn-primary-register {
+  @extend %btn-base;
+  background: linear-gradient(135deg, #8ed9bf, #50c4a0);
+}
+
+.btn-primary-token {
+  @extend %btn-base;
+  background: linear-gradient(135deg, #8fc8f0, #4aa8e0);
+}
