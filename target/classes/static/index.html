@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Autenticación</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .right-panel {
+            flex: 1;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #357abd;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .vulnerability-high {
+            color: #dc3545;
+        }
+
+        .vulnerability-medium {
+            color: #ffc107;
+        }
+
+        .token-display {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>Login</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" placeholder="usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="contraseña" required>
+                </div>
+                <button type="submit" class="btn">Iniciar Sesión</button>
+            </form>
+            <div id="result"></div>
+        </div>
+
+        <div class="right-panel">
+            <h2>Vulnerabilidades Detectadas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ataque</th>
+                        <th>Descripción</th>
+                        <th>Prevención</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="vulnerability-high">Fuerza bruta GraphQL batching</td>
+                        <td>El atacante agrupa múltiples intentos de inicio de sesión en una sola petición HTTP para burlar el rate limiting estándar y adivinar credenciales rápidamente</td>
+                        <td>Aplicar rate limiting y control de complejidad de consultas a nivel de operación individual dentro de los lotes, o deshabilitar batching</td>
+                    </tr>
+                    <tr>
+                        <td class="vulnerability-high">Modificación sin autenticación</td>
+                        <td>Un atacante con un token robado cambia el correo de la cuenta vía PUT /account sin verificar la contraseña actual, facilitando un posterior restablecimiento de acceso</td>
+                        <td>Solicitar obligatoriamente la contraseña actual del usuario antes de permitir modificaciones en datos sensibles</td>
+                    </tr>
+                    <tr>
+                        <td class="vulnerability-high">JWT vulnerable (alg: none)</td>
+                        <td>Manipulación de tokens aceptando algoritmos débiles o alg: none para alterar roles y escalar privilegios a administrador sin verificación criptográfica</td>
+                        <td>Verificar siempre la firma criptográfica, rechazar explícitamente algoritmos inseguros o alg: none, y comprobar fechas de caducidad</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="result">Cargando...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <strong>Login exitoso</strong><br>
+                            Usuario: ${data.username}<br>
+                            Token: <div class="token-display">${data.token}</div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">Credenciales inválidas</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
