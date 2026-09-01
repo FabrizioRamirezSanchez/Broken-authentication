@@ -1,26 +1,58 @@
 <div
   class="w-full h-full min-h-screen flex items-center justify-center relative overflow-hidden"
-  [ngStyle]="{ 'background': bgGradients[activeTab], 'transition': 'background 0.5s ease' }"
->
-  <!-- Blobs decorativos de fondo -->
+  [ngStyle]="{ 'background': bgGradients[activeTab], 'transition': 'background 0.5s ease' }">
+  <div
+    *ngIf="alert.show"
+    class="fixed top-6 right-6 z-50 flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+    [ngClass]="[
+    alert.type === 'success' ? 'bg-emerald-600 text-white border border-emerald-400/30' : 'bg-rose-600 text-white border border-rose-400/30',
+    alert.isClosing ? 'toast-exit' : 'toast-enter'
+  ]"
+    style="min-width: 310px; max-width: 380px;"
+  >
+    <div class="flex items-start gap-3 p-4">
+    <span class="material-symbols-rounded text-3xl mt-0.5 shrink-0">
+      {{ alert.type === 'success' ? 'check_circle' : 'error' }}
+    </span>
+      <div class="flex flex-col flex-1 pr-1">
+        <span class="font-800 text-sm leading-tight">{{ alert.title }}</span>
+        <span class="text-xs font-500 opacity-90 mt-1 leading-relaxed">{{ alert.message }}</span>
+
+        <span *ngIf="alert.note" class="text-[11px] font-500 opacity-80 mt-2.5 pt-2 border-t border-white/20 flex items-center gap-1">
+        <span class="material-symbols-rounded text-sm opacity-90">info</span>
+        {{ alert.note }}
+      </span>
+      </div>
+      <button (click)="closeAlert()" type="button" class="text-white/70 hover:text-white cursor-pointer -mr-1 -mt-1 p-1">
+        <span class="material-symbols-rounded text-lg">close</span>
+      </button>
+    </div>
+
+    <div class="w-full bg-black/10 h-1.5">
+      <div class="bg-white/80 h-full toast-progress"></div>
+    </div>
+  </div>
   <div
     *ngFor="let pos of blobs[activeTab].positions"
     class="absolute w-48 h-48 rounded-full opacity-30 blur-3xl pointer-events-none"
     [ngClass]="pos"
-    [ngStyle]="{ 'background': blobs[activeTab].color, 'transition': 'background 0.5s ease' }"
-  ></div>
+    [ngStyle]="{ 'background': blobs[activeTab].color, 'transition': 'background 0.5s ease' }">
+
+  </div>
+
+  <span class="material-symbols-rounded absolute top-8 left-12 text-4xl opacity-40 select-none pointer-events-none text-yellow-500">stars</span>
+  <span class="material-symbols-rounded absolute bottom-12 right-16 text-3xl opacity-30 select-none pointer-events-none text-indigo-400">dark_mode</span>
 
   <div
-    class="card-bg rounded-3xl shadow-2xl w-full mx-8 flex overflow-hidden"
+    class="card-bg rounded-3xl shadow-2xl w-full mx-8 flex overflow-hidden relative"
     style="max-width: 900px; min-height: 560px; box-shadow: 0 24px 70px rgba(0,0,0,0.12), 0 4px 20px rgba(0,0,0,0.07); border: 1.5px solid rgba(255,255,255,0.85);"
   >
-    <!-- Panel Lateral Izquierdo -->
+    <!-- Panel Izquierdo -->
     <div
       class="hidden md:flex flex-col justify-between p-10 relative overflow-hidden"
       [ngStyle]="{ 'width': '340px', 'min-width': '300px', 'background': panel.bg, 'transition': 'background 0.5s ease' }"
     >
       <div class="absolute bottom-[-60px] right-[-60px] w-52 h-52 rounded-full opacity-40 blur-3xl pointer-events-none" [ngStyle]="{ 'background': panel.blob }"></div>
-      <div class="absolute top-[-40px] left-[-40px] w-36 h-36 rounded-full opacity-30 blur-2xl pointer-events-none" [ngStyle]="{ 'background': panel.blob }"></div>
 
       <div>
         <div class="flex items-center gap-2 mb-8">
@@ -54,7 +86,6 @@
 
     <!-- Panel Formulario Derecha -->
     <div class="flex-1 flex flex-col min-w-0">
-      <!-- Pestañas de Navegación -->
       <div class="flex" style="border-bottom: 1.5px solid rgba(230,210,250,0.4);">
         <button
           *ngFor="let tab of tabs"
@@ -70,8 +101,8 @@
 
       <div class="flex-1 flex items-center justify-center p-8">
         <div class="w-full" style="max-width: 380px;">
-          
-          <!-- TAB 1: LOGIN PRINCIPAL (Usuario + Contraseña) -->
+
+          <!-- TAB 1: LOGIN -->
           <form *ngIf="activeTab === 'login'" (ngSubmit)="onLogin()" class="flex flex-col gap-4">
             <div class="text-center mb-1">
               <span class="material-symbols-rounded text-4xl mb-2 text-pink-500">account_circle</span>
@@ -86,19 +117,8 @@
 
             <div class="relative">
               <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-pink-400 text-xl">lock</span>
-              <input
-                class="input-field pl-10 pr-10"
-                [type]="showLoginPassword ? 'text' : 'password'"
-                [(ngModel)]="loginData.password"
-                name="loginPassword"
-                placeholder="Contraseña"
-                required
-              />
-              <button
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-pink-300 hover:text-pink-500 text-xl flex items-center cursor-pointer"
-                (click)="showLoginPassword = !showLoginPassword"
-                type="button"
-              >
+              <input class="input-field pl-10 pr-10" [type]="showLoginPassword ? 'text' : 'password'" [(ngModel)]="loginData.password" name="loginPassword" placeholder="Contraseña" required />
+              <button class="absolute right-3 top-1/2 -translate-y-1/2 text-pink-300 hover:text-pink-500 text-xl flex items-center cursor-pointer" (click)="showLoginPassword = !showLoginPassword" type="button">
                 <span class="material-symbols-rounded">{{ showLoginPassword ? 'visibility_off' : 'visibility' }}</span>
               </button>
             </div>
@@ -111,17 +131,13 @@
               <button type="button" (click)="setActive('reset')" class="hover:text-pink-600 transition-colors cursor-pointer">¿Olvidaste tu contraseña?</button>
             </div>
 
-            <button type="submit" class="btn-primary-login mt-1 flex justify-center items-center gap-2">
-              Iniciar Sesión <span class="material-symbols-rounded text-lg">login</span>
+            <button type="submit" [disabled]="loading" class="btn-primary-login mt-1 flex justify-center items-center gap-2">
+              <span *ngIf="!loading" class="flex items-center gap-2">Iniciar Sesión <span class="material-symbols-rounded text-lg">login</span></span>
+              <span *ngIf="loading" class="material-symbols-rounded animate-spin">progress_activity</span>
             </button>
-
-            <p class="text-center text-xs text-pink-400 font-500">
-              ¿No tienes una cuenta? 
-              <button type="button" (click)="setActive('register')" class="text-pink-600 font-700 hover:underline cursor-pointer">Crear cuenta</button>
-            </p>
           </form>
 
-          <!-- TAB 2: RESETEO DE CONTRASEÑA (Usuario + Nueva Contraseña) -->
+          <!-- TAB 2: RESET PASSWORD -->
           <form *ngIf="activeTab === 'reset'" (ngSubmit)="onResetPassword()" class="flex flex-col gap-4">
             <div class="text-center mb-1">
               <span class="material-symbols-rounded text-4xl mb-2 text-purple-500">lock_reset</span>
@@ -136,33 +152,19 @@
 
             <div class="relative">
               <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 text-xl">key</span>
-              <input
-                class="input-field pl-10 pr-10"
-                [type]="showResetPassword ? 'text' : 'password'"
-                [(ngModel)]="resetData.newPassword"
-                name="resetNewPassword"
-                placeholder="Nueva contraseña"
-                required
-              />
-              <button
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-purple-300 hover:text-purple-500 text-xl flex items-center cursor-pointer"
-                (click)="showResetPassword = !showResetPassword"
-                type="button"
-              >
+              <input class="input-field pl-10 pr-10" [type]="showResetPassword ? 'text' : 'password'" [(ngModel)]="resetData.newPassword" name="resetNewPassword" placeholder="Nueva contraseña" required />
+              <button class="absolute right-3 top-1/2 -translate-y-1/2 text-purple-300 hover:text-purple-500 text-xl flex items-center cursor-pointer" (click)="showResetPassword = !showResetPassword" type="button">
                 <span class="material-symbols-rounded">{{ showResetPassword ? 'visibility_off' : 'visibility' }}</span>
               </button>
             </div>
 
-            <button type="submit" class="btn-primary-reset mt-2 flex justify-center items-center gap-2">
-              Actualizar Contraseña <span class="material-symbols-rounded text-lg">published_with_changes</span>
-            </button>
-
-            <button type="button" (click)="setActive('login')" class="text-center text-xs text-purple-400 font-600 hover:text-purple-600 cursor-pointer">
-              ← Volver a Iniciar Sesión
+            <button type="submit" [disabled]="loading" class="btn-primary-reset mt-2 flex justify-center items-center gap-2">
+              <span *ngIf="!loading" class="flex items-center gap-2">Actualizar Contraseña <span class="material-symbols-rounded text-lg">published_with_changes</span></span>
+              <span *ngIf="loading" class="material-symbols-rounded animate-spin">progress_activity</span>
             </button>
           </form>
 
-          <!-- TAB 3: CREAR USUARIO (Usuario + Email + Contraseña + Rol por defecto 'user') -->
+          <!-- TAB 3: REGISTER -->
           <form *ngIf="activeTab === 'register'" (ngSubmit)="onRegister()" class="flex flex-col gap-3">
             <div class="text-center mb-1">
               <span class="material-symbols-rounded text-4xl mb-1 text-emerald-500">person_add</span>
@@ -182,51 +184,29 @@
 
             <div class="relative">
               <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 text-xl">lock</span>
-              <input
-                class="input-field pl-10 pr-10"
-                style="border-color: #8ed9bf;"
-                [type]="showRegisterPassword ? 'text' : 'password'"
-                [(ngModel)]="registerData.password"
-                name="regPassword"
-                placeholder="Contraseña"
-                required
-              />
-              <button
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-600 text-xl flex items-center cursor-pointer"
-                (click)="showRegisterPassword = !showRegisterPassword"
-                type="button"
-              >
+              <input class="input-field pl-10 pr-10" style="border-color: #8ed9bf;" [type]="showRegisterPassword ? 'text' : 'password'" [(ngModel)]="registerData.password" name="regPassword" placeholder="Contraseña" required />
+              <button class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-600 text-xl flex items-center cursor-pointer" (click)="showRegisterPassword = !showRegisterPassword" type="button">
                 <span class="material-symbols-rounded">{{ showRegisterPassword ? 'visibility_off' : 'visibility' }}</span>
               </button>
             </div>
 
-            <!-- Desplegable para Selección de Rol -->
             <div class="relative">
               <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 text-xl">badge</span>
-              <select
-                class="input-field pl-10 pr-8 appearance-none bg-white cursor-pointer"
-                style="border-color: #8ed9bf;"
-                [(ngModel)]="registerData.role"
-                name="regRole"
-              >
-                <option value="user">Usuario (user)</option>
-                <option value="admin">Administrador (admin)</option>
-                <option value="editor">Editor (editor)</option>
+              <select class="input-field pl-10 pr-8 appearance-none bg-white cursor-pointer" style="border-color: #8ed9bf;" [(ngModel)]="registerData.role" name="regRole">
+                <option value="USER">Usuario (USER)</option>
+                <option value="ADMIN">Administrador (ADMIN)</option>
+                <option value="EDITOR">Editor (EDITOR)</option>
               </select>
               <span class="material-symbols-rounded absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400 pointer-events-none text-xl">expand_more</span>
             </div>
 
-            <button type="submit" class="btn-primary-register mt-2 flex justify-center items-center gap-2">
-              Registrar Usuario <span class="material-symbols-rounded text-lg">check_circle</span>
+            <button type="submit" [disabled]="loading" class="btn-primary-register mt-2 flex justify-center items-center gap-2">
+              <span *ngIf="!loading" class="flex items-center gap-2">Registrar Usuario <span class="material-symbols-rounded text-lg">check_circle</span></span>
+              <span *ngIf="loading" class="material-symbols-rounded animate-spin">progress_activity</span>
             </button>
-
-            <p class="text-center text-xs text-emerald-500 font-500">
-              ¿Ya tienes cuenta? 
-              <button type="button" (click)="setActive('login')" class="text-emerald-700 font-700 hover:underline cursor-pointer">Iniciar sesión</button>
-            </p>
           </form>
 
-          <!-- TAB 4: IDENTIFICACIÓN DE TOKEN (Token) -->
+          <!-- TAB 4: TOKEN -->
           <form *ngIf="activeTab === 'token'" (ngSubmit)="onVerifyToken()" class="flex flex-col gap-4">
             <div class="text-center mb-1">
               <span class="material-symbols-rounded text-4xl mb-2 text-blue-500">verified_user</span>
@@ -234,23 +214,15 @@
               <p class="text-sm text-blue-400 font-500 mt-0.5">Ingresa tu token de autenticación</p>
             </div>
 
-            <div class="rounded-2xl p-3 text-center text-xs font-500 text-blue-600 flex flex-col items-center gap-1" style="background: rgba(213,232,248,0.5); border: 1.5px dashed #8fc8f0;">
-              <div class="flex items-center gap-1 font-700">Token de Seguridad <span class="material-symbols-rounded text-base">vpn_key</span></div>
-              <span>Introduce el código o token recibido para continuar</span>
-            </div>
-
             <div class="relative">
               <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-xl">token</span>
               <input class="input-field pl-10" style="border-color: #8fc8f0;" type="text" [(ngModel)]="tokenData.token" name="authToken" placeholder="Ej: eyJhbGciOiJIUzI1Ni..." required />
             </div>
 
-            <button type="submit" class="btn-primary-token flex justify-center items-center gap-2">
-              Validar Token <span class="material-symbols-rounded text-lg">shield</span>
+            <button type="submit" [disabled]="loading" class="btn-primary-token flex justify-center items-center gap-2">
+              <span *ngIf="!loading" class="flex items-center gap-2">Validar Token <span class="material-symbols-rounded text-lg">shield</span></span>
+              <span *ngIf="loading" class="material-symbols-rounded animate-spin">progress_activity</span>
             </button>
-
-            <p class="text-center text-xs text-blue-400 font-500 flex items-center justify-center gap-1">
-              Autenticación segura sin clave <span class="material-symbols-rounded text-sm">cloud</span>
-            </p>
           </form>
 
         </div>
